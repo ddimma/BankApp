@@ -1,0 +1,28 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="AuthTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="my-10 pt-10">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    MudTheme AuthTheme = new MudTheme()
+    {
+        Palette = new PaletteLight()
+        {
+            Primary = Colors.BlueGrey.Default,
+            Secondary = Colors.Grey.Darken3,
+            Tertiary = Colors.Teal.Default,
+
+            Background = new MudBlazor.Utilities.MudColor("#EEEEEE")
+        }
+    };
+}
+

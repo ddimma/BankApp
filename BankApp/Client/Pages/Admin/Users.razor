@@ -1,0 +1,59 @@
+﻿@page "/users"
+@using BankApp.Shared
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@layout AdminLayout
+
+
+<h3>Users</h3>
+
+<MudTable Items="users">
+    <HeaderContent>
+        <MudTh>Id</MudTh>
+        <MudTh>Username</MudTh>
+        <MudTh>Full name</MudTh>
+        <MudTh>Email</MudTh>
+        <MudTh>Delete</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Id</MudTd>
+        <MudTd>@context.Username</MudTd>
+        <MudTd>@context.Fullname</MudTd>
+        <MudTd>@context.Email</MudTd>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(async () => await DeleteUserAsync(context.Id))"></MudIconButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<UserDetailsDto> users = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await HttpClient.GetFromJsonAsync<List<UserDetailsDto>>("/api/account");
+    }
+
+    private async Task DeleteUserAsync(string userId)
+    {
+        try
+        {
+            var response = await HttpClient.DeleteAsync($"api/account/{userId}");
+
+            response.EnsureSuccessStatusCode();
+
+            if (response.IsSuccessStatusCode)
+            {
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Console.WriteLine("Error: Unexpected response from the API.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting user: {ex.Message}");
+        }
+    }
+}

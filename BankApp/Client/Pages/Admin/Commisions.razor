@@ -1,0 +1,127 @@
+﻿@page "/commisions"
+@layout AdminLayout
+@inject HttpClient httpClient
+
+<MudGrid>
+    <MudItem md="7">
+        @if (commisionsList is null || !commisionsList.Any())
+        {
+            <MudAlert Class="pa-4 mt-6" Severity="Severity.Error">No commissions</MudAlert>
+        }
+        else
+        {
+            <MudTable Elevation="3" Class="pa-4 mt-6" Items="@commisionsList" Height="400px">
+                <HeaderContent>
+                    <MudTh>Wallet Type</MudTh>
+                    <MudTh>Transaction Commission</MudTh>
+                    <MudTh>Delete</MudTh>
+                </HeaderContent>
+                <ColGroup>
+                    <col style="width: 50%;" />
+                    <col />
+                    <col />
+                    <col />
+                </ColGroup>
+                <RowTemplate>
+                    <MudTd DataLabel="Wallet type">@context.WalletType</MudTd>
+                    <MudTd DataLabel="Commission rate">@context.CommisionRate</MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(async () => await DeleteCommissionAsync(context))"></MudIconButton>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+            <MudItem md="12">
+                @if (newCommisionError != string.Empty)
+                {
+                    <MudAlert>@newCommisionError</MudAlert>
+                }
+            </MudItem>
+        }
+    </MudItem>
+
+    <MudItem md="4">
+        <MudGrid>
+            <MudItem md="12" Class="mt-4">
+                <MudText Typo="Typo.h6">New commission</MudText>
+            </MudItem>
+
+            <MudItem md="4">
+                <MudPaper Elevation="3" Class="pa-2">
+                    <MudTextField T="string" @bind-Value="newCommision.WalletType" Label="Wallet type" />
+                </MudPaper>
+            </MudItem>
+            <MudItem md="5">
+                <MudPaper Elevation="3" Class="pa-2">
+                    <MudTextField T="decimal" @bind-Value="newCommision.CommisionRate" Label="Commission value" />
+                </MudPaper>
+            </MudItem>
+            <MudItem md="3">
+                <MudButton Class="mt-4" Variant="Variant.Filled" Color="Color.Primary" OnClick="AddCommission">Add</MudButton>
+            </MudItem>
+            <MudItem md="12">
+                @if (newCommisionError != string.Empty)
+                {
+                    <MudAlert>@newCommisionError</MudAlert>
+                }
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+</MudGrid>
+
+
+@code {
+    private IEnumerable<CommisionDto> commisionsList;
+    private CommisionDto newCommision = new();
+    private string newCommisionError = string.Empty;
+    private string deleteCommisionError = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCommisions();
+        StateHasChanged();
+
+        await base.OnInitializedAsync();
+    }
+
+    public async Task GetCommisions() => commisionsList = await this.httpClient.GetFromJsonAsync<List<CommisionDto>>("api/commisions");
+
+
+    public async Task AddCommission()
+    {
+        if (string.IsNullOrEmpty(newCommision.WalletType))
+            newCommisionError = "The commission wallet type cannot be empty";
+        else if (newCommision.CommisionRate <= 0)
+            newCommisionError = "Exchange rate cannot be less than or equal to 0";
+        else
+        {
+            var result = await this.httpClient.PostAsJsonAsync("api/commisions/add", newCommision);
+
+            if (!result.IsSuccessStatusCode)
+                newCommisionError = await result.Content.ReadAsStringAsync();
+            else
+            {
+                await GetCommisions();
+                newCommisionError = string.Empty;
+                newCommision = new();
+            }
+        }
+        StateHasChanged();
+    }
+
+    public async Task DeleteCommissionAsync(CommisionDto commision)
+    {
+        var response = await httpClient.DeleteAsync($"api/commisions/{commision.Id}");
+        if (response.IsSuccessStatusCode)
+        {
+            await GetCommisions();
+            newCommisionError = string.Empty;
+            newCommision = new();
+        }
+        else
+        {
+            newCommisionError = "Error deleting the commission";
+        }
+        StateHasChanged();
+    }
+}
+

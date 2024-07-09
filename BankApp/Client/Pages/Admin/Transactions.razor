@@ -1,0 +1,70 @@
+﻿@page "/transactions/all"
+@using BankApp.Shared
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@layout AdminLayout
+
+
+<h3>Transactions</h3>
+
+<MudTable Items="transactions">
+    <HeaderContent>
+        <MudTh>Transaction amount</MudTh>
+        <MudTh>Source wallet</MudTh>
+        <MudTh>Destination wallet</MudTh>
+        <MudTh>Message</MudTh>
+        <MudTh>Delete</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.TransactionAmount.ToString("F2")</MudTd>
+        <MudTd>@context.SourceWalletId</MudTd>
+        <MudTd>@context.DestinationWalletId</MudTd>
+        <MudTd>@context.Message</MudTd>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(async () => await DeleteTransactionAsync(context.Id))"></MudIconButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<TransactionDto> transactions = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        transactions = await HttpClient.GetFromJsonAsync<List<TransactionDto>>("/api/transactions/all");
+    }
+
+    private async Task RepeatTransaction(TransactionDto transaction)
+    {
+        var repeatedTransaction = transaction.DeepCopy();
+
+        repeatedTransaction.Message = "Repeated: " + repeatedTransaction.Message;
+
+        await HttpClient.PostAsJsonAsync("/api/transactions/repeat", repeatedTransaction);
+
+        transactions = await HttpClient.GetFromJsonAsync<List<TransactionDto>>("/api/transactions/all");
+    }
+
+    private async Task DeleteTransactionAsync(string transactionId)
+    {
+        try
+        {
+            var response = await HttpClient.DeleteAsync($"api/transactions/{transactionId}");
+
+            response.EnsureSuccessStatusCode();
+
+            if (response.IsSuccessStatusCode)
+            {
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Console.WriteLine("Error: Unexpected response from the API.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting transaction: {ex.Message}");
+        }
+    }
+}

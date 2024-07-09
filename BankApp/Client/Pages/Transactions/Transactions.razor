@@ -1,0 +1,98 @@
+﻿@page "/transactions"
+@using BankApp.Shared
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@layout UserLayout
+
+<MudGrid>
+    <MudItem md="5">
+        <h3>Transactions</h3>
+    </MudItem>
+    <MudItem md="7">
+        <MudSelect T="string" @bind-Value="selectedWalletId" @bind-Value:after=@AfterWalletChanged>
+            <MudSelectItem T="string" Value="string.Empty">
+                All Wallets
+            </MudSelectItem>
+            @foreach (var wallet in wallets)
+            {
+                <MudSelectItem T="string" Value="@wallet.Id">
+                    @GetFormatedWalletInfo(wallet)
+                </MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+</MudGrid>
+
+<MudTable Items="filteredTransactions">
+    <HeaderContent>
+        <MudTh>Repeat</MudTh>
+        <MudTh>Transaction amount</MudTh>
+        <MudTh>Source wallet</MudTh>
+        <MudTh>Destination wallet</MudTh>
+        <MudTh>Message</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.Repeat" OnClick="@(async () => await RepeatTransaction(context))" />
+        </MudTd>
+        <MudTd>@context.TransactionAmount.ToString("F2")</MudTd>
+        <MudTd>@context.SourceWalletId</MudTd>
+        <MudTd>@context.DestinationWalletId</MudTd>
+        <MudTd>@context.Message</MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<TransactionDto> transactions = new();
+    private string selectedWalletId = string.Empty;
+    private List<WalletDto>? wallets = new();
+    private List<TransactionDto> filteredTransactions = new();
+
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        wallets = await HttpClient.GetFromJsonAsync<List<WalletDto>>("/api/wallets");
+        wallets = wallets.OrderByDescending(wallet => wallet.IsFavorite).ToList();
+        filteredTransactions = transactions = await HttpClient.GetFromJsonAsync<List<TransactionDto>>("/api/transactions");
+    }
+
+    private void AfterWalletChanged()
+    {
+        if (!string.IsNullOrEmpty(selectedWalletId))
+        {
+            filteredTransactions = transactions.Where(t => t.SourceWalletId == selectedWalletId).ToList();
+            StateHasChanged();
+        }
+        else
+        {
+            filteredTransactions = transactions;
+        }
+    }
+
+    private async Task RepeatTransaction(TransactionDto transaction)
+    {
+        var repeatedTransaction = transaction.DeepCopy();
+
+        repeatedTransaction.Message = "Repeated: " + repeatedTransaction.Message;
+
+        await HttpClient.PostAsJsonAsync("/api/transactions/repeat", repeatedTransaction);
+
+        transactions = await HttpClient.GetFromJsonAsync<List<TransactionDto>>("/api/transactions");
+    }
+
+    public string GetFormatedWalletInfo(WalletDto wallet)
+    {
+        string walletCode = wallet.WalletCode;
+
+        string last4Digits = walletCode.Length > 4 ? walletCode.Substring(walletCode.Length - 4) : walletCode;
+
+        string maskedWalletCode = $"***{last4Digits}";
+
+        string favoriteMarker = wallet.IsFavorite ? "★ " : string.Empty;
+
+        string walletInfo = $"{favoriteMarker}{maskedWalletCode} - {wallet.Amount} {wallet.Currency}";
+        return walletInfo;
+    }
+}

@@ -1,0 +1,186 @@
+﻿@page "/currencies"
+@layout AdminLayout
+@inject HttpClient httpClient
+
+<MudGrid>
+    <MudItem md="7">
+        @if (currencies is null || !currencies.Any())
+        {
+            <MudAlert Class="pa-4 mt-6" Severity="Severity.Error">Nu currencies.</MudAlert>
+        }
+        else
+        {
+            <MudTable Elevation="3" Class="pa-4 mt-6" Items="@currencies" Height="400px">
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Code</MudTh>
+                    <MudTh>Exchange rate</MudTh>
+                    <MudTh>Delete</MudTh>
+                    <MudTh>Edit</MudTh>
+                </HeaderContent>
+                <ColGroup>
+                    <col style="width: 50%;" />
+                    <col />
+                    <col />
+                    <col />
+                </ColGroup>
+                <RowTemplate>
+                    <MudTd DataLabel="Nr">@context.Name</MudTd>
+                    <MudTd DataLabel="Nr">@context.CurrencyCode</MudTd>
+                    <MudTd DataLabel="Nr">@context.ChangeRate</MudTd>
+                    <MudTd DataLabel="Nr">
+                        @if (context.CanBeRemoved)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@((e) => DeleteCurrency(context.Id))"></MudIconButton>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="Nr">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@((e) => HandleUpdateCurrencyClick(context))"></MudIconButton>
+
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudItem>
+
+    <MudItem md="4">
+        <MudGrid>
+            <MudItem md="12" Class="mt-4" Style="text-align:right">
+                @if (!isUpdateCurrency)
+                {
+                    <MudText Typo="Typo.h6">New currency</MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h6">Edit currency</MudText>
+                }
+
+            </MudItem>
+
+            <MudItem md="12">
+                <MudPaper Elevation="3" Class="pa-2">
+                    <MudTextField T="string" @bind-Value="newCurrency.Name" Label="Name" />
+                </MudPaper>
+            </MudItem>
+            <MudItem md="12">
+                <MudPaper Elevation="3" Class="pa-2">
+                    <MudTextField T="string" @bind-Value="newCurrency.CurrencyCode" Label="Code" />
+                </MudPaper>
+            </MudItem>
+            <MudItem md="12">
+                <MudPaper Elevation="3" Class="pa-2">
+                    <MudTextField T="decimal" @bind-Value="newCurrency.ChangeRate" Label="Exchange rate" />
+                </MudPaper>
+            </MudItem>
+            <MudItem md="12" Style="text-align:right">
+                @if (!isUpdateCurrency)
+                {
+                    <MudButton Class="mt-4" Variant="Variant.Filled" Color="Color.Primary" OnClick="AddCurrency">Add</MudButton>
+                }
+                else
+                {
+                    <MudButton Class="mt-4" Variant="Variant.Filled" Color="Color.Primary" OnClick="UpdateCurrency">Update</MudButton>
+
+                }
+            </MudItem>
+            <MudItem md="12">
+                @if (newCurrencyError != string.Empty)
+                {
+                    <MudAlert Severity="Severity.Warning">@newCurrencyError</MudAlert>
+                }
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private IEnumerable<CurrencyDto> currencies;
+    private CurrencyDto newCurrency = new();
+    private string newCurrencyError = string.Empty;
+    private string deleteCurrencyError = string.Empty;
+    private bool isUpdateCurrency = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCurrencies();
+        StateHasChanged();
+
+        await base.OnInitializedAsync();
+    }
+
+    public async Task GetCurrencies() => currencies = await this.httpClient.GetFromJsonAsync<List<CurrencyDto>>("api/currencies");
+
+
+    public async Task AddCurrency()
+    {
+        if (string.IsNullOrEmpty(newCurrency.Name))
+            newCurrencyError = "Currency name can not be empty.";
+        else if (string.IsNullOrEmpty(newCurrency.CurrencyCode))
+            newCurrencyError = "Currency code can not be empty";
+        else if (newCurrency.ChangeRate <= 0)
+            newCurrencyError = "Exchange rate can not be less than 0";
+        else
+        {
+            var result = await this.httpClient.PostAsJsonAsync("api/currencies/add", newCurrency);
+
+            if (!result.IsSuccessStatusCode)
+                newCurrencyError = await result.Content.ReadAsStringAsync();
+            else
+            {
+                await GetCurrencies();
+                newCurrencyError = string.Empty;
+                newCurrency = new();
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    public async Task DeleteCurrency(string id)
+    {
+        var result = await this.httpClient.PostAsJsonAsync("api/currencies/delete", id);
+
+        if (result.IsSuccessStatusCode)
+        {
+            await GetCurrencies();
+            deleteCurrencyError = string.Empty;
+        }
+        else
+            deleteCurrencyError = await result.Content.ReadAsStringAsync();
+
+        StateHasChanged();
+    }
+
+    public async Task HandleUpdateCurrencyClick(CurrencyDto currency)
+    {
+        isUpdateCurrency = true;
+        newCurrency = currency;
+        await OnInitializedAsync();
+    }
+
+    public async Task UpdateCurrency()
+    {
+        if (string.IsNullOrEmpty(newCurrency.Name))
+            newCurrencyError = "Currency name can not be empty.";
+        else if (string.IsNullOrEmpty(newCurrency.CurrencyCode))
+            newCurrencyError = "Currency code can not be empty";
+        else if (newCurrency.ChangeRate <= 0)
+            newCurrencyError = "Exchange rate can not be less than 0";
+        else
+        {
+            var result = await this.httpClient.PutAsJsonAsync($"api/currencies/{newCurrency.Id}", newCurrency);
+
+            if (!result.IsSuccessStatusCode)
+                newCurrencyError = await result.Content.ReadAsStringAsync();
+            else
+            {
+                await GetCurrencies();
+                newCurrencyError = string.Empty;
+                newCurrency = new();
+                isUpdateCurrency = false;
+            }
+        }
+
+        StateHasChanged();
+    }
+}

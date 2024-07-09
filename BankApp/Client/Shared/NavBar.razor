@@ -1,0 +1,13 @@
+﻿@inject NavigationManager NavigationManager
+
+<SfAppBar ColorMode="AppBarColor.Dark">
+    <SfButton CssClass="e-inherit" IconCss="e-icons e-home" Content="Home"
+              OnClick='(() => NavigateToPage("/"))' />
+</SfAppBar>
+
+@code{
+    void NavigateToPage(string page)
+    {
+        NavigationManager.NavigateTo(page);
+    }
+}

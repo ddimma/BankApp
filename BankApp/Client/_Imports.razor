@@ -1,0 +1,19 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using BankApp.Client
+@using BankApp.Client.Shared
+@using BankApp.Shared
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Authorization
+@using BankApp.Client.Services
+@inject NavigationManager _navigationManager
+@inject ISnackbar _snackBar
+@inject IDialogService _dialogService
+@inject HttpClient _httpClient
+@inject IJSRuntime _jsRuntime;

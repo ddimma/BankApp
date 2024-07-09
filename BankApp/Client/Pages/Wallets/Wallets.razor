@@ -1,0 +1,108 @@
+﻿@page "/wallets"
+@using BankApp.Shared
+@inject HttpClient httpClient
+@inject NavigationManager NavigationManager
+@layout UserLayout
+
+
+<h3>Wallets</h3>
+
+<MudTable Items="wallets">
+    <HeaderContent>
+        <MudTh>Favorite</MudTh>
+        <MudTh>Code</MudTh>
+        <MudTh>Type</MudTh>
+        <MudTh>Amount</MudTh>
+        <MudTh>Currency</MudTh>
+        <MudTh>Delete</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>
+            <MudButton Type="ButtonType.Submit" @onclick="() => ToggleFavorite(context)">
+                @if (context.IsFavorite)
+                {
+                    <span>&#9733;</span> <!-- Display a filled star for favorite wallets -->
+                }
+                else
+                {
+                    <span>&#9734;</span> <!-- Display an outline star for non-favorite wallets -->
+                }
+            </MudButton>
+        </MudTd>
+        <MudTd>@context.WalletCode</MudTd>
+        <MudTd>@context.Type</MudTd>
+        <MudTd>@context.Amount</MudTd>
+        <MudTd>@context.Currency</MudTd>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(async () => await DeleteWalletAsync(context))"></MudIconButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+<h2> </h2>
+
+<MudFab Href="wallets/add" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" Label="Create Wallet" Size="Size.Medium" />
+
+@code {
+    private List<WalletDto> wallets;
+    private WalletDto wallet = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            wallets = await httpClient.GetFromJsonAsync<List<WalletDto>>("api/wallets");
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    private async Task ToggleFavorite(WalletDto wallet)
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/wallets/toggle-favorite", wallet);
+
+            response.EnsureSuccessStatusCode();
+
+            if (response.IsSuccessStatusCode)
+            {
+                wallet.IsFavorite = !wallet.IsFavorite;
+                StateHasChanged();
+            }
+            else
+            {
+                Console.WriteLine("Error: Unexpected response from the API.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error toggling favorite status: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteWalletAsync(WalletDto walletDto)
+    {
+        try
+        {
+            var response = await httpClient.DeleteAsync($"api/wallets/{walletDto.Id}");
+
+            response.EnsureSuccessStatusCode();
+
+            if (response.IsSuccessStatusCode)
+            {
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Console.WriteLine("Error: Unexpected response from the API.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting wallet: {ex.Message}");
+        }
+    }
+}

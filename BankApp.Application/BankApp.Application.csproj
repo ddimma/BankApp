@@ -1,0 +1,103 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BankApp.Domain\BankApp.Domain.csproj" />
+    <ProjectReference Include="..\BankApp\Shared\BankApp.Shared.csproj" />
+    <ProjectReference Include="..\BankApp.Infrastructure\BankApp.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.2.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.11" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Commands\" />
+    <None Remove="Queries\" />
+    <None Remove="Commands\UserAccount\" />
+    <None Remove="Commands\UserAccount\RegisterUser\" />
+    <None Remove="Commands\UserAccount\LoginUser\" />
+    <None Remove="Queries\UserAccount\" />
+    <None Remove="Queries\UserAccount\GetUserDetails\" />
+    <None Remove="Commands\Transactions\" />
+    <None Remove="Commands\Transactions\AddTransactionByEmail\" />
+    <None Remove="Commands\Wallets\" />
+    <None Remove="Commands\Wallets\AddWallet\" />
+    <None Remove="Queries\Wallets\" />
+    <None Remove="Queries\Wallets\GetUserWallets\" />
+    <None Remove="Commands\Currency\" />
+    <None Remove="Queries\Currency\" />
+    <None Remove="Queries\Currency\GetCurrencies\" />
+    <None Remove="Queries\Currency\GetCurrencyById\" />
+    <None Remove="Commands\Currency\AddCurrency\" />
+    <None Remove="Commands\Currency\UpdateCurrency\" />
+    <None Remove="Commands\Currency\DeleteCurrency\" />
+    <None Remove="Commands\Commision\" />
+    <None Remove="Commands\Commision\AddCommision\" />
+    <None Remove="Commands\Commision\DeleteCommision\" />
+    <None Remove="Commands\Commision\UpdateCommision\" />
+    <None Remove="Queries\Commision\" />
+    <None Remove="Queries\Transactions\" />
+    <None Remove="Commands\Transactions\AddTransactionByWalletCode\" />
+    <None Remove="Commands\Transactions\RepeatTransaction\" />
+    <None Remove="Queries\Wallets\GetWalletById\" />
+    <None Remove="Services\" />
+    <None Remove="Services\LoggingServices\" />
+    <None Remove="Services\CommisionService\" />
+    <None Remove="Services\CommisionService\Strategies\" />
+    <None Remove="Services\TransactionObserver\" />
+    <None Remove="Services\WalletStates\" />
+    <None Remove="Commands\Wallets\DeleteWallet\" />
+    <None Remove="Queries\Transactions\GetTransactionsForAdmin\" />
+    <None Remove="Commands\Transactions\DeleteTransaction\" />
+    <None Remove="Queries\UserAccount\GetUsers\" />
+    <None Remove="Commands\UserAccount\DeleteUser\" />
+    <None Remove="Commands\Transactions\AddPersonalTransaction\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Commands\" />
+    <Folder Include="Queries\" />
+    <Folder Include="Commands\UserAccount\" />
+    <Folder Include="Commands\UserAccount\RegisterUser\" />
+    <Folder Include="Commands\UserAccount\LoginUser\" />
+    <Folder Include="Queries\UserAccount\" />
+    <Folder Include="Queries\UserAccount\GetUserDetails\" />
+    <Folder Include="Commands\Transactions\" />
+    <Folder Include="Commands\Transactions\AddTransactionByEmail\" />
+    <Folder Include="Commands\Wallets\" />
+    <Folder Include="Commands\Wallets\AddWallet\" />
+    <Folder Include="Queries\Wallets\" />
+    <Folder Include="Queries\Wallets\GetUserWallets\" />
+    <Folder Include="Commands\Currency\" />
+    <Folder Include="Queries\Currency\" />
+    <Folder Include="Queries\Currency\GetCurrencies\" />
+    <Folder Include="Queries\Currency\GetCurrencyById\" />
+    <Folder Include="Commands\Currency\AddCurrency\" />
+    <Folder Include="Commands\Currency\UpdateCurrency\" />
+    <Folder Include="Commands\Currency\DeleteCurrency\" />
+    <Folder Include="Commands\Commision\" />
+    <Folder Include="Commands\Commision\AddCommision\" />
+    <Folder Include="Commands\Commision\DeleteCommision\" />
+    <Folder Include="Commands\Commision\UpdateCommision\" />
+    <Folder Include="Queries\Commision\" />
+    <Folder Include="Queries\Transactions\" />
+    <Folder Include="Commands\Transactions\AddTransactionByWalletCode\" />
+    <Folder Include="Commands\Transactions\RepeatTransaction\" />
+    <Folder Include="Queries\Wallets\GetWalletById\" />
+    <Folder Include="Services\" />
+    <Folder Include="Services\LoggingServices\" />
+    <Folder Include="Services\CommisionService\" />
+    <Folder Include="Services\CommisionService\Strategies\" />
+    <Folder Include="Services\TransactionObserver\" />
+    <Folder Include="Services\WalletStates\" />
+    <Folder Include="Commands\Wallets\DeleteWallet\" />
+    <Folder Include="Queries\Transactions\GetTransactionsForAdmin\" />
+    <Folder Include="Commands\Transactions\DeleteTransaction\" />
+    <Folder Include="Queries\UserAccount\GetUsers\" />
+    <Folder Include="Commands\UserAccount\DeleteUser\" />
+    <Folder Include="Commands\Transactions\AddPersonalTransaction\" />
+  </ItemGroup>
+</Project>

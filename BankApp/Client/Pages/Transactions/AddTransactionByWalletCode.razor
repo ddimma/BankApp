@@ -1,0 +1,68 @@
+﻿@page "/transactions/add/p2p/walletcode"
+@inject HttpClient httpClient
+@inject NavigationManager NavigationManager
+@layout UserLayout
+@using BankApp.Shared.Factories
+
+<h3>New Transaction</h3>
+
+<MudForm Model="transactionDto" OnValidSubmit="CreateTransactionAsync">
+    <MudSelect Label="Source Wallet" @bind-Value="transactionDto.SourceWalletId">
+        @foreach (var wallet in wallets)
+        {
+            <MudSelectItem T="string" Value="@wallet.Id">
+                @GetFormatedWalletInfo(wallet)
+            </MudSelectItem>
+        }
+    </MudSelect>
+    <MudTextField Label="Destination wallet code" @bind-Value="transactionDto.DestinationWalletCode" />
+    <MudTextField Label="Amount" @bind-Value="transactionDto.TransactionAmount" />
+    <MudTextField Label="Message" @bind-Value="transactionDto.Message" />
+    <MudButton Type="ButtonType.Submit" @onclick="CreateTransactionAsync">Confirm</MudButton>
+</MudForm>
+
+@code {
+    [Inject] ISnackbar Snackbar { get; set; }
+    private TransactionByWalletCodeDto transactionDto = new();
+    private List<WalletDto>? wallets = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        wallets = await httpClient.GetFromJsonAsync<List<WalletDto>>("/api/wallets");
+        wallets = wallets.OrderByDescending(wallet => wallet.IsFavorite).ToList();
+        transactionDto.Type = "P2P";
+        transactionDto = (TransactionByWalletCodeDto)TransactionDtoFactory.Create("ByWalletCode");
+
+    }
+
+    private async Task CreateTransactionAsync()
+    {
+        var result = await httpClient.PostAsJsonAsync("api/transactions/add/p2p/walletcode", transactionDto);
+
+        if (result.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Successful transaction", Severity.Success);
+            NavigationManager.NavigateTo("/transactions");
+        }
+        else
+        {
+            Snackbar.Add("Failed to complete the transaction", Severity.Error);
+            await OnInitializedAsync();
+        }
+    }
+
+    private string GetFormatedWalletInfo(WalletDto wallet)
+    {
+        string walletCode = wallet.WalletCode;
+
+        string last4Digits = walletCode.Length > 4 ? walletCode.Substring(walletCode.Length - 4) : walletCode;
+
+        string maskedWalletCode = $"***{last4Digits}";
+
+        string favoriteMarker = wallet.IsFavorite ? "★ " : string.Empty;
+
+        string walletInfo = $"{favoriteMarker}{maskedWalletCode} - {wallet.Amount} {wallet.Currency}";
+        return walletInfo;
+    }
+}
+

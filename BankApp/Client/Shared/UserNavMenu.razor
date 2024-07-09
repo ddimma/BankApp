@@ -1,0 +1,22 @@
+﻿<MudPaper Width="250px" Class="py-3" Elevation="0">
+    <MudNavMenu>
+        <MudText Typo="Typo.h6" Class="px-4">User</MudText>
+        <MudDivider Class="my-2" />
+        <MudNavLink Href="/wallets">Wallets</MudNavLink>
+        <MudNavGroup Title="Transactions" Expanded="true">
+            <MudNavGroup Title="P2P">
+                <MudNavLink Href="/transactions/add/p2p/email"><span>&#43;</span>By email</MudNavLink>
+                <MudNavLink Href="/transactions/add/p2p/walletcode"><span>&#43;</span>By wallet code</MudNavLink>
+            </MudNavGroup>
+            <MudNavGroup Title="Personal">
+                <MudNavLink Href="/transactions/add/personal"><span>&#43;</span>Personal</MudNavLink>
+            </MudNavGroup>
+            <MudNavLink Href="/transactions">History</MudNavLink>
+        </MudNavGroup>
+        <MudNavLink Href="/cashbycode">CashByCode</MudNavLink>
+    </MudNavMenu>
+</MudPaper>
+
+@code {
+
+}

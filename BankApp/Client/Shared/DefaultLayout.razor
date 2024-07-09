@@ -1,0 +1,49 @@
+﻿@inherits LayoutComponentBase
+@inject AuthService authService
+
+<MudThemeProvider Theme="Theme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="0" Color="Color.Primary">
+        <h6> Bank App</h6>
+        <MudButton Href="/" Variant="Variant.Text" Style=@($"color:{Theme.PaletteDark.White}") Class="ml-4">Pagina Principala</MudButton>
+        <AuthorizeView>
+            <Authorized>
+                <MudButton Href="/user-panel" Variant="Variant.Text" Style=@($"color:{Theme.PaletteDark.White}") Class="ml-4">Panou utilizator</MudButton>
+                <MudSpacer />
+                <MudButton Href="/" OnClick="Logout" Variant="Variant.Filled" DisableElevation="true" Color="Color.Secondary" Class="mr-4">Logout</MudButton>
+            </Authorized>
+            <NotAuthorized>
+                <MudSpacer />
+                <MudButton Href="/login" Variant="Variant.Filled" DisableElevation="true" Color="Color.Tertiary" Class="mr-4">Autentificare</MudButton>
+                <MudButton Href="/register" Variant="Variant.Filled" DisableElevation="true" Color="Color.Secondary" Class="mr-4">Inregistrare</MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="my-8">
+            @Body
+            <MudScrollToTop>
+                <MudFab Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" />
+            </MudScrollToTop>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+
+@code {
+    private MudTheme Theme = new MudTheme()
+    {
+        Palette = new PaletteLight()
+        {
+            Primary = Colors.BlueGrey.Default,
+            Secondary = Colors.Grey.Darken3,
+            Tertiary = Colors.Teal.Default
+        },
+    };
+
+    private async Task Logout() => await authService.Logout();
+}
